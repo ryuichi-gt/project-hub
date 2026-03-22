@@ -128,7 +128,7 @@ td{padding:6px 8px;border-bottom:1px solid var(--bd)}
 <body>
 <div class="header">
   <h1><span class="dot"></span> Project Hub</h1>
-  <div class="meta">Internnect Inc. — <span id="genDate">-</span> — <span id="projectCount">0</span> projects</div>
+  <div class="meta">Internnect Inc. — <span id="genDate">-</span> — <span id="projectCount">0</span> projects <span id="dataSource"></span></div>
 </div>
 <div class="controls">
   <input class="search" id="search" placeholder="Search projects..." autocomplete="off">
@@ -188,12 +188,63 @@ const CATEGORY_ORDER = [
 ];
 
 async function loadData() {
+  // Primary: AI Tact API（リアルタイム）
+  try {
+    const [projRes, alertRes] = await Promise.all([
+      fetch("https://cmd.internnect.ai/api/projects/unified"),
+      fetch("https://cmd.internnect.ai/api/alerts")
+    ]);
+    if (projRes.ok && alertRes.ok) {
+      const projData = await projRes.json();
+      const alertData = await alertRes.json();
+
+      // AI Tact APIのレスポンスをproject-hubの形式に変換
+      DATA = {
+        generated_at: new Date().toISOString(),
+        project_count: projData.projects.length,
+        projects: projData.projects.map(p => ({
+          id: p.id,
+          name: p.meta?.name || p.name || p.id,
+          category: p.meta?.category || "",
+          status: p.meta?.status || "unknown",
+          description: p.meta?.description || "",
+          tech: p.meta?.tech || "",
+          url: p.meta?.url || "",
+          login: p.meta?.login || "",
+          deploy: p.meta?.deploy || "",
+          apis: p.meta?.apis || [],
+          business_context: p.meta?.business_context || "",
+          competitors: p.meta?.competitors || [],
+          group_company: p.meta?.group_company || "",
+          git_branch: p.git?.branch || null,
+          git_changes: p.git?.changes || 0,
+          last_commit: p.git?.lastCommitMessage || null,
+          last_commit_date: p.git?.lastCommitDate || null,
+          has_remote: p.git?.hasRemote || false,
+          github_url: p.git?.hasRemote ? `https://github.com/ryuichi-gt/${p.id}` : null,
+          open_prs: [],
+          open_issues_count: p.github?.openIssues || 0,
+          last_push_at: p.github?.lastPush || null,
+          env_keys: p.env || [],
+          source: "ai-tact-api"
+        })),
+        alerts: alertData.alerts || [],
+        source: "ai-tact"
+      };
+      render();
+      return;
+    }
+  } catch(e) {
+    console.warn("AI Tact API unavailable, falling back to static JSON", e);
+  }
+
+  // Fallback: 静的JSONファイル
   try {
     const res = await fetch("data/projects.json");
     DATA = await res.json();
+    DATA.source = "static-fallback";
   } catch {
-    try { const res = await fetch("../data/projects.json"); DATA = await res.json(); }
-    catch { DATA = { projects: [], project_count: 0, generated_at: "" }; }
+    DATA = { projects: [], project_count: 0, generated_at: "", source: "none" };
   }
   render();
 }
@@ -202,6 +253,14 @@ function render() {
   const projects = filterProjects();
   document.getElementById("genDate").textContent = DATA.generated_at ? new Date(DATA.generated_at).toLocaleDateString("ja-JP") : "-";
   document.getElementById("projectCount").textContent = DATA.project_count;
+  const sourceEl = document.getElementById("dataSource");
+  if (sourceEl) {
+    if (DATA.source === "ai-tact") {
+      sourceEl.innerHTML = '<span style="color:var(--ac3)">Live</span>';
+    } else {
+      sourceEl.innerHTML = '<span style="color:var(--warn)">Cached</span>';
+    }
+  }
   renderStats();
   renderCategoryView(projects);
   renderSidebar();
@@ -299,13 +358,14 @@ function renderCategoryView(projects) {
 // ============================================================
 function renderSidebar() {
   const all = DATA.projects;
-  const alerts = [];
   const actions = [];
   const now = new Date();
 
+  // ローカル計算によるアラート
+  const localAlerts = [];
   all.forEach(p => {
     if (p.git_changes > 0 && p.has_remote) {
-      alerts.push({
+      localAlerts.push({
         level: "critical",
         title: `${p.name||p.id} に未コミット ${p.git_changes}件`,
         detail: `${p.git_branch||"?"} ブランチに変更あり。pushし忘れの可能性。`,
@@ -315,7 +375,7 @@ function renderSidebar() {
       });
     }
     if (p.status === "active" && !p.has_remote && p.id !== "project-hub") {
-      alerts.push({
+      localAlerts.push({
         level: "warning",
         title: `${p.name||p.id} がローカルのみ`,
         detail: "GitHubにバックアップされていない。Mac故障でコード消失のリスク。",
@@ -325,7 +385,7 @@ function renderSidebar() {
       });
     }
     if (p.login && p.login.includes("要確認")) {
-      alerts.push({
+      localAlerts.push({
         level: "warning",
         title: `${p.name||p.id} のログイン情報が未確認`,
         detail: "認証情報が「要確認」のまま。実際の値を確認して .project-meta.yaml を更新する。",
@@ -335,7 +395,7 @@ function renderSidebar() {
       });
     }
     if (!p.category && p.status !== "archived") {
-      alerts.push({
+      localAlerts.push({
         level: "info",
         title: `${p.name||p.id} のメタデータなし`,
         detail: ".project-meta.yaml が未配置。カタログに正しく分類されない。",
@@ -348,7 +408,7 @@ function renderSidebar() {
     if (lastDate && p.status === "active") {
       const daysSince = Math.floor((now - new Date(lastDate)) / 86400000);
       if (daysSince > 14) {
-        alerts.push({
+        localAlerts.push({
           level: "info",
           title: `${p.name||p.id} が${daysSince}日間停止中`,
           detail: `最終更新: ${new Date(lastDate).toLocaleDateString("ja-JP")}。アーカイブ対象か確認する。`,
@@ -359,6 +419,18 @@ function renderSidebar() {
       }
     }
   });
+
+  // AI Tact APIからのアラートがある場合はそれを使う
+  const alerts = DATA.alerts && DATA.alerts.length > 0
+    ? DATA.alerts.map(a => ({
+        level: a.level,
+        title: `${a.project}: ${a.message}`,
+        detail: "",
+        project: a.project,
+        actionLabel: a.type === "uncommitted" ? "AI Tactで確認" : a.type === "no_remote" ? "AI Tactでpush" : "詳細を見る",
+        actionUrl: ["uncommitted", "no_remote"].includes(a.type) ? "https://cmd.internnect.ai" : null
+      }))
+    : localAlerts;
 
   const levelOrder = { critical: 0, warning: 1, info: 2 };
   alerts.sort((a, b) => levelOrder[a.level] - levelOrder[b.level]);
