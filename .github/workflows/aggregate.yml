@@ -2,8 +2,8 @@ name: Aggregate Projects
 
 on:
   schedule:
-    # 15分ごとに実行
-    - cron: '*/15 * * * *'
+    # 6時間ごと（フォールバック用）
+    - cron: '0 */6 * * *'
   workflow_dispatch:
   push:
     branches: [main]
