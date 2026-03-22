@@ -21,7 +21,7 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
 const GITHUB_USER = process.env.GITHUB_USER || "ryuichi-gt";
 const LOCAL_MODE = process.argv.includes("--local");
 const PROJECTS_DIR = path.join(os.homedir(), "projects");
-const OUTPUT_PATH = path.join(__dirname, "..", "data", "projects.json");
+const OUTPUT_PATH = path.join(__dirname, "..", "public", "data", "projects.json");
 
 // ============================================================
 // GitHub API helpers
