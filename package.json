@@ -1,0 +1,12 @@
+{
+  "name": "project-hub",
+  "version": "1.0.0",
+  "description": "Internnect project catalog — single source of truth",
+  "scripts": {
+    "aggregate": "node scripts/aggregate.js",
+    "aggregate:local": "node scripts/aggregate.js --local",
+    "dev": "npx serve public -l 3480"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

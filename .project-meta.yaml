@@ -1,0 +1,39 @@
+# .project-meta.yaml — Schema Reference
+# 各リポジトリのルートに置く。GitHub Actions が全リポジトリから収集して projects.json を生成する。
+#
+# 必須フィールド: name, category, status
+# それ以外は任意。GitHub API から自動取得できる情報は省略可能。
+
+name: "Project Hub"
+category: "ユーティリティ"
+status: active
+
+# URL・アクセス情報
+url: "https://projects.internnect.ai"
+login: ""
+
+# 説明（GitHub API の description より詳しく書きたい場合）
+description: |
+  全プロジェクトの集約カタログ。
+  各リポジトリの .project-meta.yaml + GitHub API から projects.json を自動生成し、
+  静的ダッシュボードとして配信する。
+
+# 技術スタック（自動検出を補完したい場合のみ）
+tech: "Node.js, GitHub Actions, Static HTML"
+
+# デプロイ先
+deploy: "Vercel"
+
+# API接続（使用している外部API）
+apis: []
+
+# ビジネス文脈（GitHub API では取れない情報）
+business_context: |
+  チーム開発移行に伴い、プロジェクト情報の一元管理と
+  他AIへのエクスポート機能を提供する。
+
+# 競合・関連情報
+competitors: []
+
+# グループ会社
+group_company: "Internnect"
