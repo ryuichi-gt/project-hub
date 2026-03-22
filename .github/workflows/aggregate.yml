@@ -1,0 +1,42 @@
+name: Aggregate Projects
+
+on:
+  schedule:
+    # 15分ごとに実行
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run aggregation
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECT_HUB_TOKEN }}
+          GITHUB_USER: ryuichi-gt
+        run: node scripts/aggregate.js
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet data/projects.json || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "project-hub-bot"
+          git config user.email "bot@internnect.ai"
+          git add data/projects.json
+          git commit -m "chore: update projects.json [auto]"
+          git push
