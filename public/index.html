@@ -9,51 +9,91 @@
 :root{--bg:#0d1117;--sf:#161b22;--sf2:#1c2128;--bd:#30363d;--tx:#e6edf3;--tm:#8b949e;--ac:#58a6ff;--ac3:#7ee787;--dn:#f85149;--ac4:#d2a8ff;--ac5:#ffa657;--warn:#d29922}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.5}
-a{color:var(--ac);text-decoration:none}
-a:hover{text-decoration:underline}
+a{color:var(--ac);text-decoration:none}a:hover{text-decoration:underline}
 
-/* Header */
 .header{background:var(--sf);border-bottom:1px solid var(--bd);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .header h1{font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
 .header .dot{width:8px;height:8px;border-radius:50%;background:var(--ac3);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .header .meta{font-size:11px;color:var(--tm)}
 
-/* Controls */
 .controls{padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--bd);background:var(--sf)}
-.search{flex:1;min-width:200px;padding:8px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-size:13px;outline:none}
+.search{flex:1;min-width:180px;padding:8px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-size:13px;outline:none}
 .search:focus{border-color:var(--ac)}
 .filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--bd);background:var(--sf2);color:var(--tm);cursor:pointer;font-size:12px;transition:all .15s}
 .filter-btn:hover,.filter-btn.active{background:var(--ac);color:#000;border-color:var(--ac)}
-.export-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--ac);background:transparent;color:var(--ac);cursor:pointer;font-size:12px;font-weight:500;margin-left:auto}
+.export-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--ac);background:transparent;color:var(--ac);cursor:pointer;font-size:12px;font-weight:500}
 .export-btn:hover{background:var(--ac);color:#000}
 
-/* Stats */
-.stats{display:flex;gap:12px;padding:16px 20px;overflow-x:auto}
-.stat{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;min-width:110px;text-align:center}
-.stat .num{font-size:24px;font-weight:700;color:var(--ac)}
-.stat .label{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+/* Main layout: content + sidebar */
+.main-layout{display:grid;grid-template-columns:1fr 320px;gap:0;min-height:calc(100vh - 110px)}
+.main-content{overflow-y:auto;padding-bottom:40px}
+.sidebar{background:var(--sf);border-left:1px solid var(--bd);overflow-y:auto;position:sticky;top:110px;height:calc(100vh - 110px)}
 
-/* Grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;padding:16px 20px}
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;position:relative}
+/* Stats bar */
+.stats{display:flex;gap:10px;padding:14px 20px;overflow-x:auto;border-bottom:1px solid var(--bd)}
+.stat{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:8px 14px;min-width:90px;text-align:center}
+.stat .num{font-size:20px;font-weight:700;color:var(--ac)}
+.stat .label{font-size:9px;color:var(--tm);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+
+/* Category sections */
+.cat-section{padding:0 20px 8px}
+.cat-header{padding:16px 0 8px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bd);margin-bottom:12px}
+.cat-header h2{font-size:13px;font-weight:600;color:var(--ac4);text-transform:uppercase;letter-spacing:.5px}
+.cat-header .cat-count{font-size:11px;color:var(--tm);background:var(--sf2);padding:2px 8px;border-radius:10px}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px;margin-bottom:8px}
+
+/* Cards */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s}
 .card:hover{border-color:var(--ac);transform:translateY(-1px)}
-.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
-.card-name{font-size:14px;font-weight:600;line-height:1.3}
-.card-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.card-name{font-size:13px;font-weight:600;line-height:1.3}
+.card-status{font-size:9px;padding:2px 7px;border-radius:10px;font-weight:500;white-space:nowrap}
 .card-status.active{background:rgba(126,231,135,.12);color:var(--ac3)}
 .card-status.prototype{background:rgba(255,166,87,.12);color:var(--ac5)}
 .card-status.archived{background:rgba(139,148,158,.12);color:var(--tm)}
 .card-status.paused{background:rgba(210,153,34,.12);color:var(--warn)}
 .card-status.unknown{background:rgba(139,148,158,.08);color:var(--tm)}
-.card-desc{font-size:12px;color:var(--tm);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.tag{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--sf2);color:var(--tm);border:1px solid var(--bd)}
-.card-footer{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--tm)}
-.card-footer .source{display:flex;align-items:center;gap:4px}
-.card-category{font-size:10px;color:var(--ac4);font-weight:500}
+.card-desc{font-size:11px;color:var(--tm);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
+.tag{font-size:9px;padding:1px 6px;border-radius:4px;background:var(--sf2);color:var(--tm);border:1px solid var(--bd)}
+.card-footer{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--tm)}
 
-/* Detail Modal */
+/* Sidebar sections */
+.sb-section{padding:16px;border-bottom:1px solid var(--bd)}
+.sb-section h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sb-section h3 .count{font-size:10px;background:var(--sf2);color:var(--tm);padding:1px 6px;border-radius:8px}
+
+/* Alert items */
+.alert-item{padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:11px;line-height:1.4;cursor:pointer;transition:background .15s}
+.alert-item:hover{background:var(--sf2)}
+.alert-item .alert-title{font-weight:600;margin-bottom:2px}
+.alert-item .alert-detail{color:var(--tm);font-size:10px}
+.alert-item.critical{border-left:3px solid var(--dn)}
+.alert-item.warning{border-left:3px solid var(--warn)}
+.alert-item.info{border-left:3px solid var(--ac)}
+
+/* Action items */
+.action-item{padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:11px;line-height:1.4;background:var(--sf2);border:1px solid var(--bd);cursor:pointer;transition:all .15s}
+.action-item:hover{border-color:var(--ac)}
+.action-item .action-label{font-weight:600;margin-bottom:2px;color:var(--ac)}
+.action-item .action-detail{color:var(--tm);font-size:10px}
+.action-item .action-project{color:var(--ac5);font-size:10px;font-weight:500}
+
+/* Sidebar summary */
+.sb-summary{padding:12px;background:var(--bg);border-radius:8px;font-size:11px;line-height:1.6;color:var(--tm)}
+.sb-summary strong{color:var(--tx)}
+
+/* URL Table */
+#urlTable{display:none;padding:16px 20px}
+.url-table-wrap{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px;overflow-x:auto}
+.url-table-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.url-table-header h3{font-size:14px;color:var(--ac)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:6px 8px;color:var(--tm);font-weight:500;border-bottom:2px solid var(--bd)}
+td{padding:6px 8px;border-bottom:1px solid var(--bd)}
+
+/* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
 .modal{background:var(--sf);border:1px solid var(--bd);border-radius:16px;max-width:720px;width:100%;max-height:85vh;overflow-y:auto;padding:24px}
@@ -62,8 +102,7 @@ a:hover{text-decoration:underline}
 .modal .meta-line{font-size:12px;color:var(--tm);margin-bottom:16px}
 .modal section{margin-bottom:16px}
 .modal section h3{font-size:12px;color:var(--ac);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600}
-.modal section p,.modal section pre{font-size:13px;line-height:1.6;color:var(--tx)}
-.modal pre{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:12px;overflow-x:auto;white-space:pre-wrap;font-family:'SF Mono',Menlo,monospace;font-size:11px}
+.modal section p{font-size:13px;line-height:1.6}
 .modal .copy-btn{padding:6px 16px;border-radius:8px;border:1px solid var(--ac);background:transparent;color:var(--ac);cursor:pointer;font-size:12px;font-weight:500}
 .modal .copy-btn:hover{background:var(--ac);color:#000}
 .modal .copy-btn.done{background:var(--ac3);color:#000;border-color:var(--ac3)}
@@ -71,27 +110,26 @@ a:hover{text-decoration:underline}
 .modal .kv dt{color:var(--tm)}
 .modal .kv dd{color:var(--tx);word-break:break-all}
 
-/* Toast */
+.empty{text-align:center;padding:60px 20px;color:var(--tm);font-size:14px}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ac3);color:#000;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;transition:transform .3s;z-index:300}
 #toast.show{transform:translateX(-50%) translateY(0)}
 
-/* Empty */
-.empty{text-align:center;padding:60px 20px;color:var(--tm);font-size:14px}
-
+@media(max-width:900px){
+  .main-layout{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-left:none;border-top:1px solid var(--bd)}
+}
 @media(max-width:600px){
-  .grid{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr}
   .stats{flex-wrap:wrap}
   .modal{margin:10px;max-height:90vh}
 }
 </style>
 </head>
 <body>
-
 <div class="header">
   <h1><span class="dot"></span> Project Hub</h1>
   <div class="meta">Internnect Inc. — <span id="genDate">-</span> — <span id="projectCount">0</span> projects</div>
 </div>
-
 <div class="controls">
   <input class="search" id="search" placeholder="Search projects..." autocomplete="off">
   <button class="filter-btn active" data-filter="all">All</button>
@@ -103,26 +141,28 @@ a:hover{text-decoration:underline}
   <button class="export-btn" id="showUrls" style="border-color:var(--ac3);color:var(--ac3)">URL一覧</button>
 </div>
 
-<div class="stats" id="stats"></div>
-<!-- URL Table (hidden by default) -->
-<div id="urlTable" style="display:none;padding:16px 20px">
-  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px;overflow-x:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3 style="font-size:14px;color:var(--ac)">成果物URL・ログイン情報一覧</h3>
+<div id="urlTable">
+  <div class="url-table-wrap">
+    <div class="url-table-header">
+      <h3>成果物URL・ログイン情報一覧</h3>
       <button class="export-btn" onclick="copyUrlTable()" style="font-size:11px;padding:4px 12px">Copy</button>
     </div>
-    <table id="urlTableBody" style="width:100%;border-collapse:collapse;font-size:12px">
-    </table>
+    <table id="urlTableBody"></table>
   </div>
 </div>
-<div class="grid" id="grid"></div>
-<div class="empty" id="empty" style="display:none">No projects found</div>
 
-<!-- Detail Modal -->
+<div class="main-layout">
+  <div class="main-content">
+    <div class="stats" id="stats"></div>
+    <div id="categoryView"></div>
+    <div class="empty" id="empty" style="display:none">No projects found</div>
+  </div>
+  <div class="sidebar" id="sidebar"></div>
+</div>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal" id="modal"></div>
 </div>
-
 <div id="toast">Copied</div>
 
 <script>
@@ -130,65 +170,64 @@ let DATA = null;
 let currentFilter = "all";
 let currentSearch = "";
 
-// ============================================================
-// Data loading
-// ============================================================
+// Category display order
+const CATEGORY_ORDER = [
+  "Internnect グループ（社内基盤）",
+  "AI Tact / Claude関連",
+  "MedIA-Ops ファミリー（コンテンツ自動運用システム）",
+  "ブランディング",
+  "個人向けプロダクト / SaaS",
+  "クライアントワーク",
+  "VTuber / エンタメ",
+  "情報収集・インテリジェンス",
+  "プロトタイプ / 企画段階",
+  "ユーティリティ / 運用ツール",
+  "ユーティリティ",
+  "空 / テスト / アーカイブ候補",
+  "Uncategorized"
+];
+
 async function loadData() {
   try {
-    const res = await fetch("../data/projects.json");
+    const res = await fetch("data/projects.json");
     DATA = await res.json();
   } catch {
-    // Fallback: try relative path variations
-    try {
-      const res = await fetch("data/projects.json");
-      DATA = await res.json();
-    } catch {
-      DATA = { projects: [], project_count: 0, generated_at: "" };
-    }
+    try { const res = await fetch("../data/projects.json"); DATA = await res.json(); }
+    catch { DATA = { projects: [], project_count: 0, generated_at: "" }; }
   }
   render();
 }
 
-// ============================================================
-// Rendering
-// ============================================================
 function render() {
   const projects = filterProjects();
   document.getElementById("genDate").textContent = DATA.generated_at ? new Date(DATA.generated_at).toLocaleDateString("ja-JP") : "-";
   document.getElementById("projectCount").textContent = DATA.project_count;
-  renderStats(projects);
-  renderGrid(projects);
+  renderStats();
+  renderCategoryView(projects);
+  renderSidebar();
 }
 
-function renderStats(projects) {
+function renderStats() {
   const all = DATA.projects;
-  const active = all.filter(p => p.status === "active").length;
-  const withRemote = all.filter(p => p.has_remote).length;
-  const withMeta = all.filter(p => p.category).length;
-  const categories = new Set(all.map(p => p.category).filter(Boolean)).size;
-
   document.getElementById("stats").innerHTML = [
     { num: all.length, label: "Total" },
-    { num: active, label: "Active" },
-    { num: withRemote, label: "GitHub" },
-    { num: all.length - withRemote, label: "Local Only" },
-    { num: categories, label: "Categories" },
-    { num: withMeta, label: "Has Meta" },
+    { num: all.filter(p => p.status === "active").length, label: "Active" },
+    { num: all.filter(p => p.has_remote).length, label: "GitHub" },
+    { num: all.filter(p => !p.has_remote).length, label: "Local" },
+    { num: new Set(all.map(p => p.category).filter(Boolean)).size, label: "Categories" },
+    { num: all.filter(p => p.git_changes > 0).length, label: "Uncommitted" },
   ].map(s => `<div class="stat"><div class="num">${s.num}</div><div class="label">${s.label}</div></div>`).join("");
 }
 
 function filterProjects() {
   return DATA.projects.filter(p => {
-    // Filter
     if (currentFilter === "active" && p.status !== "active") return false;
-    if (currentFilter === "prototype" && !["prototype", "unknown"].includes(p.status)) return false;
+    if (currentFilter === "prototype" && !["prototype","unknown"].includes(p.status)) return false;
     if (currentFilter === "remote" && !p.has_remote) return false;
     if (currentFilter === "local-only" && p.has_remote) return false;
-    // Search
     if (currentSearch) {
       const q = currentSearch.toLowerCase();
-      const haystack = [p.name, p.id, p.description, p.tech, p.category, p.business_context].join(" ").toLowerCase();
-      return haystack.includes(q);
+      return [p.name,p.id,p.description,p.tech,p.category,p.business_context].join(" ").toLowerCase().includes(q);
     }
     return true;
   });
@@ -203,50 +242,177 @@ function statusClass(s) {
   return "unknown";
 }
 
-function renderGrid(projects) {
-  const grid = document.getElementById("grid");
+function renderCategoryView(projects) {
+  const view = document.getElementById("categoryView");
   const empty = document.getElementById("empty");
-
-  if (!projects.length) {
-    grid.innerHTML = "";
-    empty.style.display = "block";
-    return;
-  }
+  if (!projects.length) { view.innerHTML = ""; empty.style.display = "block"; return; }
   empty.style.display = "none";
 
-  grid.innerHTML = projects.map((p, i) => {
-    const techs = (p.tech || "").split(",").map(t => t.trim()).filter(Boolean).slice(0, 5);
-    const sc = statusClass(p.status);
+  // Group by category
+  const grouped = {};
+  projects.forEach(p => {
+    const cat = p.category || "Uncategorized";
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(p);
+  });
+
+  // Sort categories by predefined order
+  const sortedCats = Object.keys(grouped).sort((a, b) => {
+    const ia = CATEGORY_ORDER.indexOf(a);
+    const ib = CATEGORY_ORDER.indexOf(b);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+  });
+
+  view.innerHTML = sortedCats.map(cat => {
+    const items = grouped[cat];
     return `
-    <div class="card" data-idx="${i}" onclick="openDetail('${p.id}')">
-      <div class="card-header">
-        <div>
-          <div class="card-category">${p.category || "Uncategorized"}</div>
-          <div class="card-name">${p.name || p.id}</div>
-        </div>
-        <span class="card-status ${sc}">${p.status || "unknown"}</span>
+    <div class="cat-section">
+      <div class="cat-header">
+        <h2>${cat}</h2>
+        <span class="cat-count">${items.length}</span>
       </div>
-      <div class="card-desc">${p.description || "No description"}</div>
-      <div class="card-tags">${techs.map(t => `<span class="tag">${t}</span>`).join("")}</div>
-      <div class="card-footer">
-        <span class="source">${p.has_remote ? "GitHub" : "Local"}</span>
-        <span>${p.last_commit_date ? new Date(p.last_commit_date).toLocaleDateString("ja-JP") : p.last_push_at ? new Date(p.last_push_at).toLocaleDateString("ja-JP") : "-"}</span>
+      <div class="cat-grid">
+        ${items.map(p => {
+          const techs = (p.tech||"").split(",").map(t=>t.trim()).filter(Boolean).slice(0,4);
+          const sc = statusClass(p.status);
+          return `
+          <div class="card" onclick="openDetail('${p.id}')">
+            <div class="card-header">
+              <div class="card-name">${p.name||p.id}</div>
+              <span class="card-status ${sc}">${p.status||"unknown"}</span>
+            </div>
+            <div class="card-desc">${p.description||"No description"}</div>
+            <div class="card-tags">${techs.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+            <div class="card-footer">
+              <span>${p.has_remote?"GitHub":"Local"}${p.git_changes>0?' · <span style="color:var(--warn)">'+p.git_changes+' changes</span>':''}</span>
+              <span>${p.last_commit_date?new Date(p.last_commit_date).toLocaleDateString("ja-JP"):p.last_push_at?new Date(p.last_push_at).toLocaleDateString("ja-JP"):"-"}</span>
+            </div>
+          </div>`;
+        }).join("")}
       </div>
     </div>`;
   }).join("");
 }
 
 // ============================================================
-// Detail Modal
+// Sidebar: Real alerts & next actions from project data
+// ============================================================
+function renderSidebar() {
+  const all = DATA.projects;
+  const alerts = [];
+  const actions = [];
+  const now = new Date();
+
+  all.forEach(p => {
+    // CRITICAL: Uncommitted changes on projects with remote
+    if (p.git_changes > 0 && p.has_remote) {
+      alerts.push({ level: "critical", title: `${p.name||p.id}: ${p.git_changes} uncommitted files`, detail: `Branch: ${p.git_branch||"unknown"}. Push or stash changes.`, project: p.id });
+    }
+
+    // WARNING: Active project with no GitHub remote
+    if (p.status === "active" && !p.has_remote && p.id !== "project-hub") {
+      alerts.push({ level: "warning", title: `${p.name||p.id}: no GitHub remote`, detail: "Local only. Risk of data loss. Push to GitHub.", project: p.id });
+    }
+
+    // WARNING: Login info missing (要確認)
+    if (p.login && p.login.includes("要確認")) {
+      alerts.push({ level: "warning", title: `${p.name||p.id}: login info TBD`, detail: "Login credentials marked as 要確認.", project: p.id });
+    }
+
+    // INFO: No .project-meta.yaml (no category)
+    if (!p.category && p.status !== "archived") {
+      alerts.push({ level: "info", title: `${p.name||p.id}: no metadata`, detail: "Missing .project-meta.yaml. Add for better categorization.", project: p.id });
+    }
+
+    // Stale: no activity in 14+ days
+    const lastDate = p.last_commit_date || p.last_push_at;
+    if (lastDate && p.status === "active") {
+      const daysSince = Math.floor((now - new Date(lastDate)) / 86400000);
+      if (daysSince > 14) {
+        alerts.push({ level: "info", title: `${p.name||p.id}: ${daysSince}d inactive`, detail: `Last activity: ${new Date(lastDate).toLocaleDateString("ja-JP")}`, project: p.id });
+      }
+    }
+  });
+
+  // Sort alerts: critical > warning > info
+  const levelOrder = { critical: 0, warning: 1, info: 2 };
+  alerts.sort((a, b) => levelOrder[a.level] - levelOrder[b.level]);
+
+  // Generate next actions based on portfolio analysis
+  const noRemote = all.filter(p => p.status === "active" && !p.has_remote);
+  const uncommitted = all.filter(p => p.git_changes > 0);
+  const noMeta = all.filter(p => !p.category && p.status !== "archived");
+  const loginTBD = all.filter(p => p.login && p.login.includes("要確認"));
+  const activeCount = all.filter(p => p.status === "active").length;
+
+  if (uncommitted.length > 0) {
+    actions.push({ label: "Commit & Push", detail: `${uncommitted.length} projects have uncommitted changes. Review and push.`, projects: uncommitted.map(p=>p.name||p.id) });
+  }
+  if (noRemote.length > 0) {
+    actions.push({ label: "Add GitHub Remotes", detail: `${noRemote.length} active projects are local-only. Create repos and push.`, projects: noRemote.map(p=>p.name||p.id) });
+  }
+  if (loginTBD.length > 0) {
+    actions.push({ label: "Update Login Info", detail: `${loginTBD.length} projects have unconfirmed credentials. Verify and update .project-meta.yaml.`, projects: loginTBD.map(p=>p.name||p.id) });
+  }
+  if (noMeta.length > 0) {
+    actions.push({ label: "Add Metadata", detail: `${noMeta.length} projects missing .project-meta.yaml. Add for full catalog coverage.`, projects: noMeta.map(p=>p.name||p.id) });
+  }
+
+  // Ending note specific action (business priority)
+  const endingNote = all.find(p => p.id === "ending-note");
+  if (endingNote) {
+    actions.push({ label: "ending-note: 施設導入戦略", detail: "競合にAI対話型がいない空白市場。施設向けBtoBモデルの企画壁打ちが次のステップ。", projects: ["ending-note"] });
+  }
+
+  // Portfolio summary
+  const summary = `<strong>${activeCount}</strong> active / <strong>${all.length}</strong> total projects. ` +
+    `<strong>${all.filter(p=>p.has_remote).length}</strong> on GitHub, ` +
+    `<strong>${all.filter(p=>p.url).length}</strong> deployed. ` +
+    (alerts.filter(a=>a.level==="critical").length > 0
+      ? `<span style="color:var(--dn)"><strong>${alerts.filter(a=>a.level==="critical").length} critical</strong> alerts.</span>`
+      : `No critical issues.`);
+
+  const sb = document.getElementById("sidebar");
+  sb.innerHTML = `
+    <div class="sb-section">
+      <h3>Portfolio Summary</h3>
+      <div class="sb-summary">${summary}</div>
+    </div>
+
+    ${alerts.length ? `
+    <div class="sb-section">
+      <h3>Alerts <span class="count">${alerts.length}</span></h3>
+      ${alerts.slice(0, 12).map(a => `
+        <div class="alert-item ${a.level}" onclick="openDetail('${a.project}')">
+          <div class="alert-title">${a.title}</div>
+          <div class="alert-detail">${a.detail}</div>
+        </div>
+      `).join("")}
+      ${alerts.length > 12 ? `<div style="font-size:10px;color:var(--tm);padding:4px 10px">+${alerts.length-12} more</div>` : ""}
+    </div>` : ""}
+
+    ${actions.length ? `
+    <div class="sb-section">
+      <h3>Next Actions <span class="count">${actions.length}</span></h3>
+      ${actions.map(a => `
+        <div class="action-item">
+          <div class="action-label">${a.label}</div>
+          <div class="action-detail">${a.detail}</div>
+          <div class="action-project">${a.projects.slice(0,3).join(", ")}${a.projects.length>3?" +"+( a.projects.length-3)+" more":""}</div>
+        </div>
+      `).join("")}
+    </div>` : ""}
+  `;
+}
+
+// ============================================================
+// Detail Modal (unchanged logic)
 // ============================================================
 function openDetail(id) {
   const p = DATA.projects.find(x => x.id === id);
   if (!p) return;
-
-  const modal = document.getElementById("modal");
   const sc = statusClass(p.status);
-
-  let html = `
+  document.getElementById("modal").innerHTML = `
     <div style="position:relative">
       <button class="modal-close" onclick="closeDetail()">&times;</button>
       <h2>${p.name || p.id}</h2>
@@ -254,7 +420,6 @@ function openDetail(id) {
         <span class="card-status ${sc}" style="font-size:11px">${p.status}</span>
         &nbsp; ${p.category || ""} &nbsp; ${p.has_remote ? '<a href="'+p.github_url+'" target="_blank">GitHub</a>' : "Local only"}
       </div>
-
       <section>
         <h3>Overview</h3>
         <dl class="kv">
@@ -262,11 +427,10 @@ function openDetail(id) {
           <dt>Login</dt><dd>${p.login || "-"}</dd>
           <dt>Tech</dt><dd>${p.tech || "-"}</dd>
           <dt>Deploy</dt><dd>${p.deploy || "-"}</dd>
-          <dt>APIs</dt><dd>${p.apis && p.apis.length ? p.apis.join(", ") : "-"}</dd>
+          <dt>APIs</dt><dd>${p.apis&&p.apis.length ? p.apis.join(", ") : "-"}</dd>
           <dt>Company</dt><dd>${p.group_company || "-"}</dd>
         </dl>
       </section>
-
       <section>
         <h3>Quick Actions</h3>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -275,172 +439,81 @@ function openDetail(id) {
           <a href="https://cmd.internnect.ai" target="_blank" class="copy-btn" style="text-decoration:none;border-color:var(--ac4);color:var(--ac4)">AI Tact Terminal</a>
         </div>
       </section>
-
-      ${p.description ? `<section><h3>Description</h3><p>${p.description.replace(/\n/g, "<br>")}</p></section>` : ""}
-      ${p.business_context ? `<section><h3>Business Context</h3><p>${p.business_context.replace(/\n/g, "<br>")}</p></section>` : ""}
-
+      ${p.description ? `<section><h3>Description</h3><p>${p.description.replace(/\n/g,"<br>")}</p></section>` : ""}
+      ${p.business_context ? `<section><h3>Business Context</h3><p>${p.business_context.replace(/\n/g,"<br>")}</p></section>` : ""}
       <section>
         <h3>Git Status</h3>
         <dl class="kv">
-          <dt>Branch</dt><dd>${p.git_branch || "-"}</dd>
-          <dt>Changes</dt><dd>${p.git_changes || 0} files</dd>
-          <dt>Last Commit</dt><dd>${p.last_commit || "-"}</dd>
-          <dt>Last Activity</dt><dd>${p.last_commit_date || p.last_push_at || "-"}</dd>
+          <dt>Branch</dt><dd>${p.git_branch||"-"}</dd>
+          <dt>Changes</dt><dd>${p.git_changes||0} files</dd>
+          <dt>Last Commit</dt><dd>${p.last_commit||"-"}</dd>
+          <dt>Last Activity</dt><dd>${p.last_commit_date||p.last_push_at||"-"}</dd>
         </dl>
       </section>
-
-      ${p.open_prs && p.open_prs.length ? `
-      <section>
-        <h3>Open PRs</h3>
-        ${p.open_prs.map(pr => `<div style="font-size:12px;margin-bottom:4px">#${pr.number} ${pr.title} <span style="color:var(--tm)">by ${pr.author}</span></div>`).join("")}
-      </section>` : ""}
-
-      ${p.competitors && p.competitors.length ? `
-      <section>
-        <h3>Competitors</h3>
-        <p>${p.competitors.join(", ")}</p>
-      </section>` : ""}
-
+      ${p.open_prs&&p.open_prs.length ? `<section><h3>Open PRs</h3>${p.open_prs.map(pr=>`<div style="font-size:12px;margin-bottom:4px">#${pr.number} ${pr.title} <span style="color:var(--tm)">by ${pr.author}</span></div>`).join("")}</section>` : ""}
+      ${p.competitors&&p.competitors.length ? `<section><h3>Competitors</h3><p>${p.competitors.join(", ")}</p></section>` : ""}
       <section style="display:flex;gap:8px;margin-top:20px">
         <button class="copy-btn" onclick="copyProjectForAI('${p.id}')">Copy for AI</button>
         <button class="copy-btn" onclick="copyProjectJSON('${p.id}')">Copy JSON</button>
       </section>
     </div>`;
-
-  modal.innerHTML = html;
   document.getElementById("modalOverlay").classList.add("open");
 }
-
-function closeDetail() {
-  document.getElementById("modalOverlay").classList.remove("open");
-}
+function closeDetail() { document.getElementById("modalOverlay").classList.remove("open"); }
 
 // ============================================================
 // Export / Copy
 // ============================================================
 function projectToMarkdown(p) {
-  let md = `## ${p.name || p.id}\n`;
-  md += `- Status: ${p.status}\n`;
-  md += `- Category: ${p.category || "N/A"}\n`;
+  let md = `## ${p.name||p.id}\n- Status: ${p.status}\n- Category: ${p.category||"N/A"}\n`;
   if (p.url) md += `- URL: ${p.url}\n`;
   if (p.login) md += `- Login: ${p.login}\n`;
-  md += `- Tech: ${p.tech || "N/A"}\n`;
+  md += `- Tech: ${p.tech||"N/A"}\n`;
   if (p.deploy) md += `- Deploy: ${p.deploy}\n`;
-  if (p.apis && p.apis.length) md += `- APIs: ${p.apis.join(", ")}\n`;
+  if (p.apis&&p.apis.length) md += `- APIs: ${p.apis.join(", ")}\n`;
   if (p.group_company) md += `- Company: ${p.group_company}\n`;
   if (p.github_url) md += `- GitHub: ${p.github_url}\n`;
   if (p.description) md += `\n${p.description}\n`;
   if (p.business_context) md += `\nBusiness Context:\n${p.business_context}\n`;
-  if (p.competitors && p.competitors.length) md += `\nCompetitors: ${p.competitors.join(", ")}\n`;
+  if (p.competitors&&p.competitors.length) md += `\nCompetitors: ${p.competitors.join(", ")}\n`;
   return md;
 }
-
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2000);
-}
-
+function showToast(msg) { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2000); }
 function copyProjectForAI(id) {
-  const p = DATA.projects.find(x => x.id === id);
-  if (!p) return;
-  navigator.clipboard.writeText(projectToMarkdown(p)).then(() => {
-    showToast("Copied for AI");
-    document.querySelectorAll(".copy-btn").forEach(b => { if (b.textContent === "Copy for AI") { b.classList.add("done"); b.textContent = "Done"; setTimeout(() => { b.classList.remove("done"); b.textContent = "Copy for AI"; }, 2000); }});
-  });
+  const p=DATA.projects.find(x=>x.id===id); if(!p)return;
+  navigator.clipboard.writeText(projectToMarkdown(p)).then(()=>showToast("Copied for AI"));
 }
-
 function copyProjectJSON(id) {
-  const p = DATA.projects.find(x => x.id === id);
-  if (!p) return;
-  navigator.clipboard.writeText(JSON.stringify(p, null, 2)).then(() => showToast("JSON Copied"));
+  const p=DATA.projects.find(x=>x.id===id); if(!p)return;
+  navigator.clipboard.writeText(JSON.stringify(p,null,2)).then(()=>showToast("JSON Copied"));
 }
-
-document.getElementById("exportAll").addEventListener("click", () => {
-  let text = `# Internnect Project Catalog\nGenerated: ${DATA.generated_at}\nTotal: ${DATA.project_count} projects\n\n`;
-  const categories = [...new Set(DATA.projects.map(p => p.category || "Uncategorized"))];
-  categories.forEach(cat => {
-    text += `\n---\n# ${cat}\n\n`;
-    DATA.projects.filter(p => (p.category || "Uncategorized") === cat).forEach(p => {
-      text += projectToMarkdown(p) + "\n";
-    });
-  });
-  navigator.clipboard.writeText(text).then(() => showToast("All projects exported"));
+document.getElementById("exportAll").addEventListener("click",()=>{
+  let text=`# Internnect Project Catalog\nGenerated: ${DATA.generated_at}\nTotal: ${DATA.project_count} projects\n\n`;
+  const cats=[...new Set(DATA.projects.map(p=>p.category||"Uncategorized"))];
+  cats.forEach(cat=>{text+=`\n---\n# ${cat}\n\n`;DATA.projects.filter(p=>(p.category||"Uncategorized")===cat).forEach(p=>{text+=projectToMarkdown(p)+"\n";});});
+  navigator.clipboard.writeText(text).then(()=>showToast("All projects exported"));
 });
 
-// ============================================================
-// Event listeners
-// ============================================================
-document.getElementById("search").addEventListener("input", (e) => {
-  currentSearch = e.target.value;
-  render();
-});
-
-document.querySelectorAll(".filter-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    currentFilter = btn.dataset.filter;
-    render();
-  });
-});
-
-document.getElementById("modalOverlay").addEventListener("click", (e) => {
-  if (e.target === e.currentTarget) closeDetail();
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeDetail();
-});
-
-// ============================================================
 // URL Table
-// ============================================================
-let urlTableVisible = false;
-
-document.getElementById("showUrls").addEventListener("click", () => {
-  urlTableVisible = !urlTableVisible;
-  const el = document.getElementById("urlTable");
-  el.style.display = urlTableVisible ? "block" : "none";
-  if (urlTableVisible) renderUrlTable();
-});
-
-function renderUrlTable() {
-  const withUrl = DATA.projects.filter(p => p.url && p.url !== "-");
-  const tbody = document.getElementById("urlTableBody");
-  tbody.innerHTML = `
-    <thead><tr style="border-bottom:2px solid var(--bd)">
-      <th style="text-align:left;padding:6px 8px;color:var(--tm);font-weight:500">Project</th>
-      <th style="text-align:left;padding:6px 8px;color:var(--tm);font-weight:500">URL</th>
-      <th style="text-align:left;padding:6px 8px;color:var(--tm);font-weight:500">Login</th>
-      <th style="text-align:left;padding:6px 8px;color:var(--tm);font-weight:500">Status</th>
-    </tr></thead>
-    <tbody>
-    ${withUrl.map(p => `
-      <tr style="border-bottom:1px solid var(--bd)">
-        <td style="padding:6px 8px;font-weight:500;white-space:nowrap">${p.name || p.id}</td>
-        <td style="padding:6px 8px"><a href="${p.url}" target="_blank" style="font-family:'SF Mono',monospace;font-size:11px">${p.url}</a></td>
-        <td style="padding:6px 8px;font-size:11px;color:var(--tm)">${p.login || "-"}</td>
-        <td style="padding:6px 8px"><span class="card-status ${statusClass(p.status)}" style="font-size:10px">${p.status}</span></td>
-      </tr>
-    `).join("")}
-    </tbody>`;
+let urlVis=false;
+document.getElementById("showUrls").addEventListener("click",()=>{urlVis=!urlVis;document.getElementById("urlTable").style.display=urlVis?"block":"none";if(urlVis)renderUrlTable();});
+function renderUrlTable(){
+  const w=DATA.projects.filter(p=>p.url&&p.url!=="-");
+  document.getElementById("urlTableBody").innerHTML=`<thead><tr><th>Project</th><th>URL</th><th>Login</th><th>Status</th></tr></thead><tbody>${w.map(p=>`<tr><td style="font-weight:500;white-space:nowrap">${p.name||p.id}</td><td><a href="${p.url}" target="_blank" style="font-family:monospace;font-size:11px">${p.url}</a></td><td style="font-size:11px;color:var(--tm)">${p.login||"-"}</td><td><span class="card-status ${statusClass(p.status)}" style="font-size:10px">${p.status}</span></td></tr>`).join("")}</tbody>`;
+}
+function copyUrlTable(){
+  const w=DATA.projects.filter(p=>p.url&&p.url!=="-");
+  let t="# URL一覧\n\n| Project | URL | Login | Status |\n|---|---|---|---|\n";
+  w.forEach(p=>{t+=`| ${p.name||p.id} | ${p.url} | ${p.login||"-"} | ${p.status} |\n`;});
+  navigator.clipboard.writeText(t).then(()=>showToast("URL一覧をコピーしました"));
 }
 
-function copyUrlTable() {
-  const withUrl = DATA.projects.filter(p => p.url && p.url !== "-");
-  let text = "# 成果物URL・ログイン情報一覧\\n\\n";
-  text += "| Project | URL | Login | Status |\\n|---|---|---|---|\\n";
-  withUrl.forEach(p => {
-    text += `| ${p.name || p.id} | ${p.url} | ${p.login || "-"} | ${p.status} |\\n`;
-  });
-  navigator.clipboard.writeText(text).then(() => showToast("URL一覧をコピーしました"));
-}
+// Event listeners
+document.getElementById("search").addEventListener("input",e=>{currentSearch=e.target.value;render();});
+document.querySelectorAll(".filter-btn").forEach(btn=>{btn.addEventListener("click",()=>{document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");currentFilter=btn.dataset.filter;render();});});
+document.getElementById("modalOverlay").addEventListener("click",e=>{if(e.target===e.currentTarget)closeDetail();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDetail();});
 
-// ============================================================
-// Init
-// ============================================================
 loadData();
 </script>
 </body>
