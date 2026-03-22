@@ -295,7 +295,7 @@ function renderCategoryView(projects) {
 }
 
 // ============================================================
-// Sidebar: Real alerts & next actions from project data
+// Sidebar: Alerts & actionable next steps (Japanese, with links)
 // ============================================================
 function renderSidebar() {
   const all = DATA.projects;
@@ -304,105 +304,180 @@ function renderSidebar() {
   const now = new Date();
 
   all.forEach(p => {
-    // CRITICAL: Uncommitted changes on projects with remote
     if (p.git_changes > 0 && p.has_remote) {
-      alerts.push({ level: "critical", title: `${p.name||p.id}: ${p.git_changes} uncommitted files`, detail: `Branch: ${p.git_branch||"unknown"}. Push or stash changes.`, project: p.id });
+      alerts.push({
+        level: "critical",
+        title: `${p.name||p.id} に未コミット ${p.git_changes}件`,
+        detail: `${p.git_branch||"?"} ブランチに変更あり。pushし忘れの可能性。`,
+        project: p.id,
+        actionLabel: "AI Tactで確認",
+        actionUrl: "https://cmd.internnect.ai"
+      });
     }
-
-    // WARNING: Active project with no GitHub remote
     if (p.status === "active" && !p.has_remote && p.id !== "project-hub") {
-      alerts.push({ level: "warning", title: `${p.name||p.id}: no GitHub remote`, detail: "Local only. Risk of data loss. Push to GitHub.", project: p.id });
+      alerts.push({
+        level: "warning",
+        title: `${p.name||p.id} がローカルのみ`,
+        detail: "GitHubにバックアップされていない。Mac故障でコード消失のリスク。",
+        project: p.id,
+        actionLabel: "AI Tactでpush",
+        actionUrl: "https://cmd.internnect.ai"
+      });
     }
-
-    // WARNING: Login info missing (要確認)
     if (p.login && p.login.includes("要確認")) {
-      alerts.push({ level: "warning", title: `${p.name||p.id}: login info TBD`, detail: "Login credentials marked as 要確認.", project: p.id });
+      alerts.push({
+        level: "warning",
+        title: `${p.name||p.id} のログイン情報が未確認`,
+        detail: "認証情報が「要確認」のまま。実際の値を確認して .project-meta.yaml を更新する。",
+        project: p.id,
+        actionLabel: "サイトを開く",
+        actionUrl: p.url || null
+      });
     }
-
-    // INFO: No .project-meta.yaml (no category)
     if (!p.category && p.status !== "archived") {
-      alerts.push({ level: "info", title: `${p.name||p.id}: no metadata`, detail: "Missing .project-meta.yaml. Add for better categorization.", project: p.id });
+      alerts.push({
+        level: "info",
+        title: `${p.name||p.id} のメタデータなし`,
+        detail: ".project-meta.yaml が未配置。カタログに正しく分類されない。",
+        project: p.id,
+        actionLabel: "詳細を見る",
+        actionUrl: null
+      });
     }
-
-    // Stale: no activity in 14+ days
     const lastDate = p.last_commit_date || p.last_push_at;
     if (lastDate && p.status === "active") {
       const daysSince = Math.floor((now - new Date(lastDate)) / 86400000);
       if (daysSince > 14) {
-        alerts.push({ level: "info", title: `${p.name||p.id}: ${daysSince}d inactive`, detail: `Last activity: ${new Date(lastDate).toLocaleDateString("ja-JP")}`, project: p.id });
+        alerts.push({
+          level: "info",
+          title: `${p.name||p.id} が${daysSince}日間停止中`,
+          detail: `最終更新: ${new Date(lastDate).toLocaleDateString("ja-JP")}。アーカイブ対象か確認する。`,
+          project: p.id,
+          actionLabel: "詳細を見る",
+          actionUrl: null
+        });
       }
     }
   });
 
-  // Sort alerts: critical > warning > info
   const levelOrder = { critical: 0, warning: 1, info: 2 };
   alerts.sort((a, b) => levelOrder[a.level] - levelOrder[b.level]);
 
-  // Generate next actions based on portfolio analysis
+  // Actionable next steps with real links
   const noRemote = all.filter(p => p.status === "active" && !p.has_remote);
   const uncommitted = all.filter(p => p.git_changes > 0);
   const noMeta = all.filter(p => !p.category && p.status !== "archived");
   const loginTBD = all.filter(p => p.login && p.login.includes("要確認"));
-  const activeCount = all.filter(p => p.status === "active").length;
 
   if (uncommitted.length > 0) {
-    actions.push({ label: "Commit & Push", detail: `${uncommitted.length} projects have uncommitted changes. Review and push.`, projects: uncommitted.map(p=>p.name||p.id) });
+    actions.push({
+      label: "未コミットの変更をpush",
+      detail: `${uncommitted.length}件のプロジェクトに未pushの変更がある`,
+      projects: uncommitted,
+      actionLabel: "AI Tactでまとめてpush",
+      actionUrl: "https://cmd.internnect.ai",
+      command: uncommitted.map(p => `cd ~/projects/${p.id} && git add -A && git commit -m "wip" && git push`).join("\n")
+    });
   }
   if (noRemote.length > 0) {
-    actions.push({ label: "Add GitHub Remotes", detail: `${noRemote.length} active projects are local-only. Create repos and push.`, projects: noRemote.map(p=>p.name||p.id) });
+    actions.push({
+      label: "GitHubリポジトリを作成",
+      detail: `${noRemote.length}件がローカルのみ。バックアップのためGitHubにpushする`,
+      projects: noRemote,
+      actionLabel: "AI Tactで実行",
+      actionUrl: "https://cmd.internnect.ai",
+      command: noRemote.map(p => `cd ~/projects/${p.id} && gh repo create ryuichi-gt/${p.id} --private --source=. --push`).join("\n")
+    });
   }
   if (loginTBD.length > 0) {
-    actions.push({ label: "Update Login Info", detail: `${loginTBD.length} projects have unconfirmed credentials. Verify and update .project-meta.yaml.`, projects: loginTBD.map(p=>p.name||p.id) });
+    actions.push({
+      label: "ログイン情報を確認・更新",
+      detail: `${loginTBD.length}件の認証情報が「要確認」のまま`,
+      projects: loginTBD,
+      actionLabel: "対象サイトを開く",
+      actionUrl: loginTBD.find(p => p.url)?.url || null,
+      command: null
+    });
   }
   if (noMeta.length > 0) {
-    actions.push({ label: "Add Metadata", detail: `${noMeta.length} projects missing .project-meta.yaml. Add for full catalog coverage.`, projects: noMeta.map(p=>p.name||p.id) });
+    actions.push({
+      label: ".project-meta.yaml を追加",
+      detail: `${noMeta.length}件にメタデータがない。カタログの分類精度が下がる`,
+      projects: noMeta,
+      actionLabel: "AI Tactで一括生成",
+      actionUrl: "https://cmd.internnect.ai",
+      command: null
+    });
   }
 
-  // Ending note specific action (business priority)
   const endingNote = all.find(p => p.id === "ending-note");
   if (endingNote) {
-    actions.push({ label: "ending-note: 施設導入戦略", detail: "競合にAI対話型がいない空白市場。施設向けBtoBモデルの企画壁打ちが次のステップ。", projects: ["ending-note"] });
+    actions.push({
+      label: "ending-note: 施設導入の企画壁打ち",
+      detail: "AI対話型エンディングノートは市場に存在しない空白地帯。施設向けBtoBの導入メリットを整理する",
+      projects: [endingNote],
+      actionLabel: "AIにエクスポート",
+      actionUrl: null,
+      isExport: true,
+      exportId: "ending-note"
+    });
   }
 
-  // Portfolio summary
-  const summary = `<strong>${activeCount}</strong> active / <strong>${all.length}</strong> total projects. ` +
-    `<strong>${all.filter(p=>p.has_remote).length}</strong> on GitHub, ` +
-    `<strong>${all.filter(p=>p.url).length}</strong> deployed. ` +
-    (alerts.filter(a=>a.level==="critical").length > 0
-      ? `<span style="color:var(--dn)"><strong>${alerts.filter(a=>a.level==="critical").length} critical</strong> alerts.</span>`
-      : `No critical issues.`);
+  const activeCount = all.filter(p => p.status === "active").length;
+  const critCount = alerts.filter(a => a.level === "critical").length;
+  const warnCount = alerts.filter(a => a.level === "warning").length;
 
   const sb = document.getElementById("sidebar");
   sb.innerHTML = `
     <div class="sb-section">
-      <h3>Portfolio Summary</h3>
-      <div class="sb-summary">${summary}</div>
+      <h3>ポートフォリオ概況</h3>
+      <div class="sb-summary">
+        <strong>${activeCount}</strong>件 稼働中 / 全<strong>${all.length}</strong>件<br>
+        GitHub: <strong>${all.filter(p=>p.has_remote).length}</strong>件 ・ デプロイ済み: <strong>${all.filter(p=>p.url).length}</strong>件
+        ${critCount > 0 ? `<br><span style="color:var(--dn)">緊急 ${critCount}件</span>` : ""}
+        ${warnCount > 0 ? ` <span style="color:var(--warn)">注意 ${warnCount}件</span>` : ""}
+      </div>
     </div>
 
     ${alerts.length ? `
     <div class="sb-section">
-      <h3>Alerts <span class="count">${alerts.length}</span></h3>
-      ${alerts.slice(0, 12).map(a => `
-        <div class="alert-item ${a.level}" onclick="openDetail('${a.project}')">
+      <h3>アラート <span class="count">${alerts.length}</span></h3>
+      ${alerts.slice(0, 10).map(a => `
+        <div class="alert-item ${a.level}">
           <div class="alert-title">${a.title}</div>
           <div class="alert-detail">${a.detail}</div>
+          <div style="margin-top:4px;display:flex;gap:4px">
+            ${a.actionUrl ? `<a href="${a.actionUrl}" target="_blank" style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--sf2);border:1px solid var(--bd);color:var(--ac);text-decoration:none">${a.actionLabel}</a>` : `<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--sf2);border:1px solid var(--bd);color:var(--ac);cursor:pointer" onclick="openDetail('${a.project}')">${a.actionLabel}</span>`}
+          </div>
         </div>
       `).join("")}
-      ${alerts.length > 12 ? `<div style="font-size:10px;color:var(--tm);padding:4px 10px">+${alerts.length-12} more</div>` : ""}
+      ${alerts.length > 10 ? `<div style="font-size:10px;color:var(--tm);padding:4px 10px">他 ${alerts.length-10}件</div>` : ""}
     </div>` : ""}
 
     ${actions.length ? `
     <div class="sb-section">
-      <h3>Next Actions <span class="count">${actions.length}</span></h3>
-      ${actions.map(a => `
+      <h3>ネクストアクション <span class="count">${actions.length}</span></h3>
+      ${actions.map((a, i) => `
         <div class="action-item">
           <div class="action-label">${a.label}</div>
           <div class="action-detail">${a.detail}</div>
-          <div class="action-project">${a.projects.slice(0,3).join(", ")}${a.projects.length>3?" +"+( a.projects.length-3)+" more":""}</div>
+          <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
+            ${a.isExport ? `<span style="font-size:10px;padding:3px 10px;border-radius:4px;background:var(--ac);color:#000;cursor:pointer;font-weight:500" onclick="copyProjectForAI('${a.exportId}')">AIにコピー</span>` : ""}
+            ${a.actionUrl ? `<a href="${a.actionUrl}" target="_blank" style="font-size:10px;padding:3px 10px;border-radius:4px;background:var(--ac);color:#000;text-decoration:none;font-weight:500">${a.actionLabel}</a>` : ""}
+            ${a.command ? `<span style="font-size:10px;padding:3px 10px;border-radius:4px;background:var(--sf2);border:1px solid var(--bd);color:var(--ac3);cursor:pointer;font-weight:500" onclick="copyCommand(${i})">コマンドをコピー</span>` : ""}
+          </div>
+          <div class="action-project">${a.projects.slice(0,3).map(p=>p.name||p.id||p).join(", ")}${a.projects.length>3?" 他"+(a.projects.length-3)+"件":""}</div>
         </div>
       `).join("")}
     </div>` : ""}
   `;
+
+  // Store action commands for copy
+  window._actionCommands = actions.map(a => a.command || "");
+}
+function copyCommand(idx) {
+  const cmd = window._actionCommands?.[idx];
+  if (cmd) navigator.clipboard.writeText(cmd).then(() => showToast("コマンドをコピーしました"));
 }
 
 // ============================================================
