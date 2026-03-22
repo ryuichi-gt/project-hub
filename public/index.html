@@ -100,9 +100,21 @@ a:hover{text-decoration:underline}
   <button class="filter-btn" data-filter="remote">GitHub</button>
   <button class="filter-btn" data-filter="local-only">Local Only</button>
   <button class="export-btn" id="exportAll">AI Export</button>
+  <button class="export-btn" id="showUrls" style="border-color:var(--ac3);color:var(--ac3)">URL一覧</button>
 </div>
 
 <div class="stats" id="stats"></div>
+<!-- URL Table (hidden by default) -->
+<div id="urlTable" style="display:none;padding:16px 20px">
+  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px;overflow-x:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:14px;color:var(--ac)">成果物URL・ログイン情報一覧</h3>
+      <button class="export-btn" onclick="copyUrlTable()" style="font-size:11px;padding:4px 12px">Copy</button>
+    </div>
+    <table id="urlTableBody" style="width:100%;border-collapse:collapse;font-size:12px">
+    </table>
+  </div>
+</div>
 <div class="grid" id="grid"></div>
 <div class="empty" id="empty" style="display:none">No projects found</div>
 
@@ -255,6 +267,15 @@ function openDetail(id) {
         </dl>
       </section>
 
+      <section>
+        <h3>Quick Actions</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${p.url ? '<a href="'+p.url+'" target="_blank" class="copy-btn" style="text-decoration:none">Open Site</a>' : ''}
+          ${p.github_url ? '<a href="'+p.github_url+'" target="_blank" class="copy-btn" style="text-decoration:none">GitHub</a>' : ''}
+          <a href="https://cmd.internnect.ai" target="_blank" class="copy-btn" style="text-decoration:none;border-color:var(--ac4);color:var(--ac4)">AI Tact Terminal</a>
+        </div>
+      </section>
+
       ${p.description ? `<section><h3>Description</h3><p>${p.description.replace(/\n/g, "<br>")}</p></section>` : ""}
       ${p.business_context ? `<section><h3>Business Context</h3><p>${p.business_context.replace(/\n/g, "<br>")}</p></section>` : ""}
 
@@ -372,6 +393,50 @@ document.getElementById("modalOverlay").addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeDetail();
 });
+
+// ============================================================
+// URL Table
+// ============================================================
+let urlTableVisible = false;
+
+document.getElementById("showUrls").addEventListener("click", () => {
+  urlTableVisible = !urlTableVisible;
+  const el = document.getElementById("urlTable");
+  el.style.display = urlTableVisible ? "block" : "none";
+  if (urlTableVisible) renderUrlTable();
+});
+
+function renderUrlTable() {
+  const withUrl = DATA.projects.filter(p => p.url && p.url !== "-");
+  const tbody = document.getElementById("urlTableBody");
+  tbody.innerHTML = `
+    <thead><tr style="border-bottom:2px solid var(--bd)">
+      <th style="text-align:left;padding:6px 8px;color:var(--tm);font-weight:500">Project</th>
+      <th style="text-align:left;padding:6px 8px;color:var(--tm);font-weight:500">URL</th>
+      <th style="text-align:left;padding:6px 8px;color:var(--tm);font-weight:500">Login</th>
+      <th style="text-align:left;padding:6px 8px;color:var(--tm);font-weight:500">Status</th>
+    </tr></thead>
+    <tbody>
+    ${withUrl.map(p => `
+      <tr style="border-bottom:1px solid var(--bd)">
+        <td style="padding:6px 8px;font-weight:500;white-space:nowrap">${p.name || p.id}</td>
+        <td style="padding:6px 8px"><a href="${p.url}" target="_blank" style="font-family:'SF Mono',monospace;font-size:11px">${p.url}</a></td>
+        <td style="padding:6px 8px;font-size:11px;color:var(--tm)">${p.login || "-"}</td>
+        <td style="padding:6px 8px"><span class="card-status ${statusClass(p.status)}" style="font-size:10px">${p.status}</span></td>
+      </tr>
+    `).join("")}
+    </tbody>`;
+}
+
+function copyUrlTable() {
+  const withUrl = DATA.projects.filter(p => p.url && p.url !== "-");
+  let text = "# 成果物URL・ログイン情報一覧\\n\\n";
+  text += "| Project | URL | Login | Status |\\n|---|---|---|---|\\n";
+  withUrl.forEach(p => {
+    text += `| ${p.name || p.id} | ${p.url} | ${p.login || "-"} | ${p.status} |\\n`;
+  });
+  navigator.clipboard.writeText(text).then(() => showToast("URL一覧をコピーしました"));
+}
 
 // ============================================================
 // Init
